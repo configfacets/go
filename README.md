@@ -26,7 +26,7 @@ Our hierarchical design simplifies managing multi-level organizational structure
 ### Installation
 
 ```sh
-go get github.com/configfacets/go/configfacets
+go get -u github.com/configfacets/go@latest
 ```
 
 ### Fetching Configuration Data
