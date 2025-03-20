@@ -44,13 +44,14 @@ import (
 )
 
 func main() {
-	apiUrl := "https://configfacets.com/apis/repos/configfacets/core-concepts/appconfigs/resources/collections/feature-flags/exec?format=json"
+	source := "https://configfacets.com/apis/repos/configfacets/core-concepts/appconfigs/resources/collections/feature-flags/exec?format=json"
+	sourceType := "url"
 	apiKey := "<your_api_key>"
 	postBody := map[string]interface{}{
 		"facets": []string{"env:prod", "country:CA"},
 	}
 
-	config := configfacets.NewConfiguration(apiUrl, apiKey, postBody)
+	config := configfacets.NewConfiguration(source, sourceType, apiKey, postBody)
 	err := config.Fetch()
 	if err != nil {
 		log.Fatalf("Error fetching config: %v", err)
@@ -64,7 +65,7 @@ func main() {
 
 ## API Reference
 
-### `NewConfiguration(apiUrl, apiKey string, postBody map[string]interface{}) *Configuration`
+### `NewConfiguration(source, sourceType, apiKey string, postBody map[string]interface{}) *Configuration`
 
 Initializes a new Configfacets configuration client.
 

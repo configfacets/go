@@ -10,34 +10,57 @@ import (
 )
 
 // Configuration represents the configuration client
-type Configuration struct {
-	APIUrl   string
-	APIKey   string
-	PostBody map[string]interface{}
-	Response map[string]interface{}
+ type Configuration struct {
+	Source     string
+	SourceType string
+	APIKey     string
+	PostBody   map[string]interface{}
+	Response   map[string]interface{}
 }
 
 // NewConfiguration initializes the configuration client
-func NewConfiguration(apiUrl, apiKey string, postBody map[string]interface{}) *Configuration {
+func NewConfiguration(source, sourceType, apiKey string, postBody map[string]interface{}) *Configuration {
 	return &Configuration{
-		APIUrl:   apiUrl,
-		APIKey:   apiKey,
-		PostBody: postBody,
+		Source:     source,
+		SourceType: sourceType,
+		APIKey:     apiKey,
+		PostBody:   postBody,
 	}
 }
 
-// Fetch retrieves the configuration from the API
+// Fetch retrieves the configuration from the source (API or file)
 func (c *Configuration) Fetch() error {
-	if c.APIUrl == "" {
-		return errors.New("missing API URL")
+	if c.Source == "" {
+		return errors.New("missing source")
 	}
 
+	if c.SourceType == "file" {
+		data, err := ioutil.ReadFile(c.Source)
+		if err != nil {
+			return err
+		}
+
+		var result map[string]interface{}
+		if err := json.Unmarshal(data, &result); err != nil {
+			return err
+		}
+
+		c.Response = result
+		return nil
+	} else if c.SourceType == "url" {
+		return c.fetchFromURL()
+	}
+
+	return errors.New("invalid source type")
+}
+
+func (c *Configuration) fetchFromURL() error {
 	jsonData, err := json.Marshal(c.PostBody)
 	if err != nil {
 		return err
 	}
 
-	req, err := http.NewRequest("POST", c.APIUrl, bytes.NewBuffer(jsonData))
+	req, err := http.NewRequest("POST", c.Source, bytes.NewBuffer(jsonData))
 	if err != nil {
 		return err
 	}
@@ -79,6 +102,5 @@ func (c *Configuration) GetValue(keyPath string) interface{} {
 		fmt.Printf("Warning: Key '%s' not found. Returning nil.\n", keyPath)
 		return nil
 	}
-	
 	return value
 }
